@@ -1,13 +1,44 @@
-import { signupInput } from "@jakex123/medium-common";
+import { signupInput,signinInput } from "@jakex123/medium-common";
+import axios from "axios";
 import { ChangeEvent, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { BACKEND_URL } from "../config";
+
+
+
+
 
 const Auth = ({ type }: { type: "signup" | "signin" }) => {
-  const [inputs, setInputs] = useState<signupInput>({
+  const [inputs, setInputs] = useState<signinInput | signupInput>({
     email: "",
     password: "",
     name: "",
   });
+  const [sendState,setSendState]=useState(false)
+  const navigate=useNavigate()
+
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
+    "Access-Control-Max-Age": "86400",
+  };
+
+  const sendRequest=async ( )=>{
+    try{
+    setSendState(true)
+    //@ts-expect-error flagging corsHeaders
+    const res=await axios.post(`${BACKEND_URL}/api/v1/user/${type==="signup"?"signup":"signin"}`,inputs,corsHeaders) 
+    const jwt=res.data;
+    console.log(jwt)
+    localStorage.setItem("token",jwt.jwt)
+    navigate("/blogs")
+    }
+    catch(e){
+        setSendState(false)
+        console.log(e)
+    }
+}
+
   return (
     <div className={`h-screen flex flex-col justify-center items-center ${type==="signup" && "mx-4"}`}>
       <div className="lg:max-w-lg">
@@ -47,7 +78,7 @@ const Auth = ({ type }: { type: "signup" | "signin" }) => {
             }));
           }}
         />
-        <button className="w-full py-2 rounded-md text-white bg-black">{type==="signup"?"Sign Up":"Sign In"}</button>
+        <button disabled={sendState?true:false} onClick={sendRequest} className={`w-full py-2 rounded-md text-white ${sendState?"bg-stone-500":"bg-black"}`}>{type==="signup"?"Sign Up":"Sign In"}</button>
       </div>
     </div>
   );
