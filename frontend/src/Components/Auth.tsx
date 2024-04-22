@@ -2,7 +2,6 @@ import { signupInput,signinInput } from "@jakex123/medium-common";
 import axios from "axios";
 import { ChangeEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BACKEND_URL } from "../config";
 
 
 
@@ -26,8 +25,9 @@ const Auth = ({ type }: { type: "signup" | "signin" }) => {
   const sendRequest=async ( )=>{
     try{
     setSendState(true)
+    console.log(import.meta.env.VITE_BACKEND_URL)
     //@ts-expect-error flagging corsHeaders
-    const res=await axios.post(`${BACKEND_URL}/api/v1/user/${type==="signup"?"signup":"signin"}`,inputs,corsHeaders) 
+    const res=await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/user/${type==="signup"?"signup":"signin"}`,inputs,corsHeaders) 
     const jwt=res.data;
     console.log(jwt)
     localStorage.setItem("token",jwt.jwt)
